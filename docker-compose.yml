@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  forum-app:
+    build: .
+    ports:
+      - "8082:8082"
+    volumes:
+      - forum-db:/app/forum.db
+    environment:
+      - GIN_MODE=release
+
+volumes:
+  forum-db:
