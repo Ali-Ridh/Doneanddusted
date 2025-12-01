@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaming Forum</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        h1 {
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            margin: 0;
+        }
+        .auth-section {
+            display: flex;
+            gap: 10px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .auth-form {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff88;
+            margin-bottom: 20px;
+        }
+        .auth-form h2 {
+            color: #00ff88;
+            margin-top: 0;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            flex: 1;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff88;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #cccccc;
+        }
+        button {
+            background: #00ff88;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00cc66;
+        }
+        .btn-secondary {
+            background: #666;
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            background: #555;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stats-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stats-card h3 {
+            color: #00ff88;
+            margin-top: 0;
+        }
+        .stats-number {
+            font-size: 2em;
+            color: #00ff88;
+        }
+        .recent-posts {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .recent-posts h3 {
+            color: #00ff88;
+            margin-top: 0;
+        }
+        .search-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-form input {
+            flex: 1;
+        }
+        .post-form {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .post-form h2 {
+            color: #00ff88;
+            margin-top: 0;
+        }
+        .autocomplete {
+            position: relative;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #00ff88;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #00ff88;
+        }
+        .autocomplete-item:hover, .autocomplete-item.highlighted {
+            background: rgba(0, 255, 136, 0.2);
+        }
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .post {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .post-title {
+            color: #00ff88;
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .post-author {
+            color: #cccccc;
+            font-size: 0.9em;
+        }
+        .post-game-tag {
+            background: #ff6b6b;
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .post-content {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .post-media {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .post-date {
+            color: #cccccc;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .pagination button {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+        .pagination button.active {
+            background: #00ff88;
+            color: #0f0f23;
+        }
+        .loading {
+            text-align: center;
+            color: #00ff88;
+            padding: 20px;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .search-form {
+                flex-direction: column;
+            }
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gaming Forum</h1>
+            <div class="auth-section" id="authSection">
+                <button id="loginBtn">Login</button>
+                <button id="registerBtn">Register</button>
+            </div>
+            <div class="auth-section hidden" id="userSection">
+                <span id="userDisplay"></span>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+
+        <!-- Authentication Forms -->
+        <div id="authForms" class="auth-form hidden">
+            <div id="loginForm">
+                <h2>Login</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                </div>
+                <button id="doLogin">Login</button>
+                <button id="switchToRegister" class="btn-secondary">Need to Register?</button>
+            </div>
+            <div id="registerForm" class="hidden">
+                <h2>Register</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regUsername">Username:</label>
+                        <input type="text" id="regUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail">Email:</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regPassword">Password:</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regConfirmPassword">Confirm Password:</label>
+                        <input type="password" id="regConfirmPassword" required>
+                    </div>
+                </div>
+                <button id="doRegister">Register</button>
+                <button id="switchToLogin" class="btn-secondary">Already have account?</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard hidden">
+            <div class="stats-card">
+                <h3>Your Stats</h3>
+                <div class="stats-number" id="userPostCount">0</div>
+                <p>Posts Created</p>
+            </div>
+            <div class="recent-posts">
+                <h3>Recent Posts</h3>
+                <div id="recentPostsList"></div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div id="searchSection" class="search-section hidden">
+            <h2>Search Posts</h2>
+            <div class="search-form">
+                <input type="text" id="searchQuery" placeholder="Search posts...">
+                <select id="gameFilter">
+                    <option value="">All Games</option>
+                </select>
+                <button id="searchBtn">Search</button>
+                <button id="clearSearchBtn" class="btn-secondary">Clear</button>
+            </div>
+        </div>
+
+        <!-- Create Post Form -->
+        <div id="postFormSection" class="post-form hidden">
+            <h2>Create New Post</h2>
+            <form id="postForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Content:</label>
+                    <textarea id="content" name="content" rows="4" required></textarea>
+                </div>
+                <div class="form-group autocomplete">
+                    <label for="gameName">Game Name:</label>
+                    <input type="text" id="gameName" name="game_name" required autocomplete="off">
+                    <div id="autocomplete-list" class="autocomplete-items"></div>
+                </div>
+                <div class="form-group">
+                    <label for="file">Media (Image/Video):</label>
+                    <input type="file" id="file" name="file" accept="image/*,video/*">
+                </div>
+                <button type="submit">Create Post</button>
+            </form>
+        </div>
+
+        <!-- Posts Feed -->
+        <div id="feed" class="feed">
+            <div class="loading">Loading posts...</div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination hidden"></div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentToken = null;
+        let currentPage = 1;
+        let currentSearch = '';
+        let currentGameFilter = '';
+        let currentAutocompleteIndex = -1;
+        let paginationData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for stored token
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                currentToken = token;
+                // Decode token to get user info (simplified)
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    currentUser = { id: payload.user_id, username: payload.username };
+                    showAuthenticatedView();
+                } catch (e) {
+                    localStorage.removeItem('authToken');
+                    showUnauthenticatedView();
+                }
+            } else {
+                showUnauthenticatedView();
+            }
+
+            // Event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Auth buttons
+            document.getElementById('loginBtn').addEventListener('click', () => toggleAuthForm('login'));
+            document.getElementById('registerBtn').addEventListener('click', () => toggleAuthForm('register'));
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('switchToRegister').addEventListener('click', () => toggleAuthForm('register'));
+            document.getElementById('switchToLogin').addEventListener('click', () => toggleAuthForm('login'));
+
+            // Auth form submissions
+            document.getElementById('doLogin').addEventListener('click', login);
+            document.getElementById('doRegister').addEventListener('click', register);
+
+            // Post form
+            document.getElementById('postForm').addEventListener('submit', submitPost);
+
+            // Search
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+            document.getElementById('searchQuery').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            // Game autocomplete
+            const gameNameInput = document.getElementById('gameName');
+            gameNameInput.addEventListener('input', handleGameNameInput);
+            gameNameInput.addEventListener('keydown', handleGameNameKeydown);
+        }
+
+        function showUnauthenticatedView() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('userSection').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('searchSection').classList.add('hidden');
+            document.getElementById('postFormSection').classList.add('hidden');
+            document.getElementById('authForms').classList.add('hidden');
+            loadPosts();
+        }
+
+        function showAuthenticatedView() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('userSection').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('searchSection').classList.remove('hidden');
+            document.getElementById('postFormSection').classList.remove('hidden');
+            document.getElementById('authForms').classList.add('hidden');
+
+            document.getElementById('userDisplay').textContent = `Welcome, ${currentUser.username}!`;
+
+            loadDashboard();
+            loadGamesForFilter();
+            loadPosts();
+        }
+
+        function toggleAuthForm(form) {
+            const authForms = document.getElementById('authForms');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            authForms.classList.remove('hidden');
+
+            if (form === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', currentToken);
+                    showAuthenticatedView();
+                } else {
+                    const error = await response.json();
+                    alert('Login failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed');
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    toggleAuthForm('login');
+                } else {
+                    const error = await response.json();
+                    alert('Registration failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentToken = null;
+            localStorage.removeItem('authToken');
+            showUnauthenticatedView();
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/dashboard', {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('userPostCount').textContent = data.user_stats.post_count;
+                    displayRecentPosts(data.recent_posts);
+                }
+            } catch (error) {
+                console.error('Dashboard load error:', error);
+            }
+        }
+
+        function displayRecentPosts(posts) {
+            const container = document.getElementById('recentPostsList');
+            container.innerHTML = '';
+
+            if (posts.length === 0) {
+                container.innerHTML = '<p>No recent posts</p>';
+                return;
+            }
+
+            posts.slice(0, 5).forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <h4 class="post-title">${post.title}</h4>
+                        <span class="post-author">by ${post.user.username}</span>
+                    </div>
+                    <span class="post-game-tag">${post.game_tag}</span>
+                    <div class="post-content">${post.content.substring(0, 100)}...</div>
+                    <div class="post-date">${new Date(post.created_at).toLocaleString()}</div>
+                `;
+                container.appendChild(postElement);
+            });
+        }
+
+        async function loadGamesForFilter() {
+            try {
+                const response = await fetch('/api/games');
+                if (response.ok) {
+                    const games = await response.json();
+                    const gameFilter = document.getElementById('gameFilter');
+                    gameFilter.innerHTML = '<option value="">All Games</option>';
+                    games.forEach(game => {
+                        const option = document.createElement('option');
+                        option.value = game.title;
+                        option.textContent = game.title;
+                        gameFilter.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Games load error:', error);
+            }
+        }
+
+        async function loadPosts(page = 1) {
+            currentPage = page;
+            let url = `/api/posts?page=${page}&limit=10`;
+
+            if (currentSearch) {
+                url = `/api/posts/search?q=${encodeURIComponent(currentSearch)}&page=${page}&limit=10`;
+                if (currentGameFilter) {
+                    url += `&game_tag=${encodeURIComponent(currentGameFilter)}`;
+                }
+            }
+
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayPosts(data.posts);
+                    if (data.pagination) {
+                        paginationData = data.pagination;
+                        renderPagination();
+                    }
+                } else {
+                    console.error('Failed to load posts');
+                }
+            } catch (error) {
+                console.error('Posts load error:', error);
+            }
+        }
+
+        function displayPosts(posts) {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+
+            if (posts.length === 0) {
+                feed.innerHTML = '<p>No posts found.</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
+
+                let mediaElement = '';
+                if (post.media_url) {
+                    if (post.media_type === 'image') {
+                        mediaElement = `<img src="${post.media_url}" alt="Post media" class="post-media">`;
+                    } else if (post.media_type === 'video') {
+                        mediaElement = `<video controls class="post-media"><source src="${post.media_url}" type="video/mp4"></video>`;
+                    }
+                }
+
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <h3 class="post-title">${post.title}</h3>
+                        <span class="post-author">by ${post.user ? post.user.username : 'Anonymous'}</span>
+                    </div>
+                    <span class="post-game-tag">${post.game_tag}</span>
+                    <div class="post-content">${post.content}</div>
+                    ${mediaElement}
+                    <div class="post-date">${new Date(post.created_at).toLocaleString()}</div>
+                `;
+
+                feed.appendChild(postElement);
+            });
+        }
+
+        function renderPagination() {
+            const paginationEl = document.getElementById('pagination');
+            paginationEl.innerHTML = '';
+
+            if (!paginationData || paginationData.pages <= 1) {
+                paginationEl.classList.add('hidden');
+                return;
+            }
+
+            paginationEl.classList.remove('hidden');
+
+            const { page, pages } = paginationData;
+
+            // Previous button
+            if (page > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = 'Previous';
+                prevBtn.addEventListener('click', () => loadPosts(page - 1));
+                paginationEl.appendChild(prevBtn);
+            }
+
+            // Page numbers
+            const startPage = Math.max(1, page - 2);
+            const endPage = Math.min(pages, page + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                if (i === page) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.addEventListener('click', () => loadPosts(i));
+                paginationEl.appendChild(pageBtn);
+            }
+
+            // Next button
+            if (page < pages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = 'Next';
+                nextBtn.addEventListener('click', () => loadPosts(page + 1));
+                paginationEl.appendChild(nextBtn);
+            }
+        }
+
+        async function submitPost(event) {
+            event.preventDefault();
+
+            if (!currentToken) {
+                alert('Please login to create posts');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('content', document.getElementById('content').value);
+            formData.append('game_name', document.getElementById('gameName').value);
+
+            const fileInput = document.getElementById('file');
+            if (fileInput.files[0]) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('postForm').reset();
+                    loadPosts();
+                    loadDashboard(); // Refresh dashboard stats
+                } else {
+                    const error = await response.json();
+                    alert('Failed to create post: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error submitting post:', error);
+                alert('Failed to create post');
+            }
+        }
+
+        function performSearch() {
+            currentSearch = document.getElementById('searchQuery').value.trim();
+            currentGameFilter = document.getElementById('gameFilter').value;
+            currentPage = 1;
+            loadPosts(1);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('gameFilter').value = '';
+            currentSearch = '';
+            currentGameFilter = '';
+            currentPage = 1;
+            loadPosts(1);
+        }
+
+        async function handleGameNameInput() {
+            const query = this.value.trim();
+            const autocompleteList = document.getElementById('autocomplete-list');
+
+            if (query.length < 2) {
+                autocompleteList.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/games/search?q=${encodeURIComponent(query)}`);
+                if (response.ok) {
+                    const games = await response.json();
+                    displayAutocomplete(games);
+                }
+            } catch (error) {
+                console.error('Error searching games:', error);
+            }
+        }
+
+        function displayAutocomplete(games) {
+            const autocompleteList = document.getElementById('autocomplete-list');
+            autocompleteList.innerHTML = '';
+
+            games.slice(0, 5).forEach((game, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = `
+                    ${game.background_image ? `<img src="${game.background_image}" class="game-cover" alt="${game.name}">` : ''}
+                    <div class="game-info">
+                        <h4>${game.name}</h4>
+                    </div>
+                `;
+                item.addEventListener('click', () => selectGame(game.name));
+                autocompleteList.appendChild(item);
+            });
+
+            currentAutocompleteIndex = -1;
+        }
+
+        function selectGame(gameName) {
+            document.getElementById('gameName').value = gameName;
+            document.getElementById('autocomplete-list').innerHTML = '';
+        }
+
+        function handleGameNameKeydown(event) {
+            const autocompleteList = document.getElementById('autocomplete-list');
+            const items = autocompleteList.getElementsByClassName('autocomplete-item');
+
+            if (event.key === 'ArrowDown') {
+                currentAutocompleteIndex = Math.min(currentAutocompleteIndex + 1, items.length - 1);
+                highlightItem(items);
+            } else if (event.key === 'ArrowUp') {
+                currentAutocompleteIndex = Math.max(currentAutocompleteIndex - 1, -1);
+                highlightItem(items);
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                if (currentAutocompleteIndex >= 0 && items[currentAutocompleteIndex]) {
+                    const gameName = items[currentAutocompleteIndex].querySelector('h4').textContent;
+                    selectGame(gameName);
+                }
+            } else if (event.key === 'Escape') {
+                autocompleteList.innerHTML = '';
+                currentAutocompleteIndex = -1;
+            }
+        }
+
+        function highlightItem(items) {
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('highlighted');
+            }
+            if (currentAutocompleteIndex >= 0) {
+                items[currentAutocompleteIndex].classList.add('highlighted');
+            }
+        }
+    </script>
+</body>
+</html>
