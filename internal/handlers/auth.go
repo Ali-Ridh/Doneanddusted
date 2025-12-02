@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"forumapp/internal/config"
 	"forumapp/internal/middleware"
 	"forumapp/internal/models"
 
@@ -13,19 +14,21 @@ import (
 
 // AuthHandler handles authentication-related requests
 type AuthHandler struct {
-	db *gorm.DB
+	db  *gorm.DB
+	cfg *config.Config
 }
 
 // NewAuthHandler creates a new AuthHandler
-func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	return &AuthHandler{db: db}
+func NewAuthHandler(db *gorm.DB, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{db: db, cfg: cfg}
 }
 
 // RegisterRequest represents the registration request body
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Username     string `json:"username" binding:"required"`
+	Email        string `json:"email" binding:"required,email"`
+	Password     string `json:"password" binding:"required,min=6"`
+	ModeratorKey string `json:"moderator_key,omitempty"`
 }
 
 // LoginRequest represents the login request body
@@ -66,6 +69,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		Role:     "user",
+	}
+
+	// Check if moderator key is provided and valid
+	if req.ModeratorKey != "" && req.ModeratorKey == h.cfg.ModeratorKey {
+		user.Role = "moderator"
 	}
 
 	if err := h.db.Create(&user).Error; err != nil {

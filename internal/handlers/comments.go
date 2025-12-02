@@ -154,9 +154,10 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	c.JSON(http.StatusOK, comment)
 }
 
-// DeleteComment deletes a comment (only by the author)
+// DeleteComment deletes a comment (by the author, moderators, or owners)
 func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	role := c.GetString("role")
 	commentID := c.Param("id")
 
 	var comment models.Comment
@@ -165,8 +166,8 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Check ownership
-	if comment.UserID != userID {
+	// Check ownership or moderator/owner privileges
+	if comment.UserID != userID && role != "moderator" && role != "owner" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own comments"})
 		return
 	}

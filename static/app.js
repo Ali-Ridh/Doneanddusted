@@ -216,6 +216,7 @@ async function register() {
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
+    const moderatorKey = document.getElementById('regModeratorKey').value;
 
     if (!username || !email || !password || !confirmPassword) {
         alert('Please fill in all fields');
@@ -231,7 +232,7 @@ async function register() {
         const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
+            body: JSON.stringify({ username, email, password, moderator_key: moderatorKey })
         });
 
         if (response.ok) {
@@ -461,7 +462,7 @@ function renderComment(comment, depth = 0) {
             <div class="comment-content">${escapeHtml(comment.content)}</div>
             <div class="comment-actions">
                 ${canReply ? `<button class="comment-action" onclick="showReplyForm(${comment.id})">↩️ Reply</button>` : ''}
-                ${state.currentUser && state.currentUser.id === comment.user_id ? `
+                ${state.currentUser && (state.currentUser.id === comment.user_id || state.currentUser.role === 'moderator' || state.currentUser.role === 'owner') ? `
                     <button class="comment-action" onclick="deleteComment(${comment.id})">🗑️ Delete</button>
                 ` : ''}
             </div>

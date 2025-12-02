@@ -27,7 +27,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 	router.StaticFile("/favicon.svg", "./public/favicon.svg")
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(db)
+	authHandler := handlers.NewAuthHandler(db, cfg)
 	postHandler := handlers.NewPostHandler(db)
 	gameHandler := handlers.NewGameHandler(db, cfg)
 	dashboardHandler := handlers.NewDashboardHandler(db)

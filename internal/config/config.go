@@ -9,6 +9,7 @@ type Config struct {
 	JWTSecret    string
 	RAWGAPIKey   string
 	UploadDir    string
+	ModeratorKey string
 }
 
 // Load returns the application configuration
@@ -19,6 +20,7 @@ func Load() *Config {
 		JWTSecret:    getEnv("JWT_SECRET", "your-secret-key"),
 		RAWGAPIKey:   getEnv("RAWG_API_KEY", "5e3f8883fe504827bf672e7bc73cbdee"),
 		UploadDir:    getEnv("UPLOAD_DIR", "./uploads"),
+		ModeratorKey: getEnv("MODERATOR_KEY", "moderator123"),
 	}
 }
 
