@@ -24,6 +24,7 @@
                 </div>
                 <div class="user-section hidden" id="userSection">
                     <span class="user-display" id="userDisplay"></span>
+                    <button class="btn btn-primary hidden" id="appointModeratorBtn">Appoint Moderator</button>
                     <button class="btn btn-secondary" id="logoutBtn">Logout</button>
                 </div>
             </div>
@@ -35,7 +36,7 @@
             <div class="modal hidden" id="authModal">
                 <div class="modal-content">
                     <button class="modal-close" id="closeAuthModal">&times;</button>
-                    
+
                     <!-- Login Form -->
                     <div id="loginForm">
                         <h2>Login</h2>
@@ -73,6 +74,19 @@
                         <button class="btn btn-primary btn-full" id="doRegister">Register</button>
                         <p class="form-switch">Already have an account? <a href="#" id="switchToLogin">Login</a></p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Appoint Moderator Modal -->
+            <div class="modal hidden" id="appointModeratorModal">
+                <div class="modal-content">
+                    <button class="modal-close" id="closeAppointModeratorModal">&times;</button>
+                    <h2>Appoint Moderator</h2>
+                    <div class="form-group">
+                        <label for="appointUserId">User ID</label>
+                        <input type="number" id="appointUserId" placeholder="Enter user ID to appoint as moderator">
+                    </div>
+                    <button class="btn btn-primary btn-full" id="doAppointModerator">Appoint Moderator</button>
                 </div>
             </div>
 

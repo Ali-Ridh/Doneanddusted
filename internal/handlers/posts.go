@@ -267,9 +267,10 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
-// DeletePost deletes a post (only by the author)
+// DeletePost deletes a post (by author, moderator, or owner)
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	role := c.GetString("role")
 	postID := c.Param("id")
 
 	var post models.Post
@@ -278,8 +279,8 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 		return
 	}
 
-	// Check ownership
-	if post.UserID != userID {
+	// Check permissions: owner and moderator can delete any, user only own
+	if role != "owner" && role != "moderator" && post.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own posts"})
 		return
 	}

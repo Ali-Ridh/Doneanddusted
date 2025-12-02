@@ -24,7 +24,7 @@ function initializeApp() {
         state.currentToken = token;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            state.currentUser = { id: payload.user_id, username: payload.username };
+            state.currentUser = { id: payload.user_id, username: payload.username, role: payload.role };
             showAuthenticatedView();
         } catch (e) {
             localStorage.removeItem('authToken');
@@ -33,7 +33,7 @@ function initializeApp() {
     } else {
         showUnauthenticatedView();
     }
-    
+
     loadPosts();
     loadTags();
     loadLocalGames(); // Load games on init
@@ -49,8 +49,11 @@ function setupEventListeners() {
     // Auth buttons
     document.getElementById('loginBtn').addEventListener('click', () => showAuthModal('login'));
     document.getElementById('registerBtn').addEventListener('click', () => showAuthModal('register'));
+    document.getElementById('appointModeratorBtn').addEventListener('click', showAppointModeratorModal);
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('closeAuthModal').addEventListener('click', hideAuthModal);
+    document.getElementById('closeAppointModeratorModal').addEventListener('click', hideAppointModeratorModal);
+    document.getElementById('doAppointModerator').addEventListener('click', appointModerator);
     document.getElementById('switchToRegister').addEventListener('click', (e) => {
         e.preventDefault();
         toggleAuthForm('register');
@@ -96,6 +99,9 @@ function setupEventListeners() {
     document.getElementById('postModal').addEventListener('click', (e) => {
         if (e.target.id === 'postModal') hidePostModal();
     });
+    document.getElementById('appointModeratorModal').addEventListener('click', (e) => {
+        if (e.target.id === 'appointModeratorModal') hideAppointModeratorModal();
+    });
 }
 
 // Tab Navigation
@@ -135,7 +141,16 @@ function showAuthenticatedView() {
     document.getElementById('createTab').classList.remove('hidden');
     document.getElementById('createGameSection').classList.remove('hidden');
     document.getElementById('commentForm').classList.remove('hidden');
-    document.getElementById('userDisplay').textContent = `Welcome, ${state.currentUser.username}!`;
+    const roleDisplay = state.currentUser.role ? ` (${state.currentUser.role})` : '';
+    document.getElementById('userDisplay').textContent = `Welcome, ${state.currentUser.username}${roleDisplay}!`;
+
+    // Show appoint moderator button for owners
+    const appointBtn = document.getElementById('appointModeratorBtn');
+    if (state.currentUser.role === 'owner') {
+        appointBtn.classList.remove('hidden');
+    } else {
+        appointBtn.classList.add('hidden');
+    }
 }
 
 function showUnauthenticatedView() {
@@ -363,12 +378,20 @@ async function showPostDetail(postId) {
 }
 
 function displayPostDetail(post) {
+    const canDelete = state.currentUser && (
+        state.currentUser.id === post.user_id ||
+        state.currentUser.role === 'moderator' ||
+        state.currentUser.role === 'owner'
+    );
+    const deleteButton = canDelete ? `<button class="btn btn-danger btn-small" onclick="deletePost(${post.id})">🗑️ Delete Post</button>` : '';
+
     document.getElementById('postDetail').innerHTML = `
         <div class="post-header">
             <h2 class="post-title">${escapeHtml(post.title)}</h2>
             <span class="post-author">by ${post.user ? escapeHtml(post.user.username) : 'Anonymous'}</span>
+            ${deleteButton ? `<div style="margin-top: 10px;">${deleteButton}</div>` : ''}
         </div>
-        ${post.game ? `<span class="post-game-tag">${escapeHtml(post.game.title)}</span>` : 
+        ${post.game ? `<span class="post-game-tag">${escapeHtml(post.game.title)}</span>` :
           (post.game_tag ? `<span class="post-game-tag">${escapeHtml(post.game_tag)}</span>` : '')}
         ${post.game && post.game.tags && post.game.tags.length > 0 ? `
             <div class="tags-list">
@@ -377,7 +400,7 @@ function displayPostDetail(post) {
         ` : ''}
         <div class="post-content" style="white-space: pre-wrap;">${escapeHtml(post.content)}</div>
         ${post.media_url ? `
-            ${post.media_type === 'image' 
+            ${post.media_type === 'image'
                 ? `<img src="${post.media_url}" alt="Post media" class="post-media" style="max-width:100%;max-height:400px;">`
                 : `<video controls class="post-media" style="max-width:100%;"><source src="${post.media_url}" type="video/mp4"></video>`
             }
@@ -389,6 +412,14 @@ function displayPostDetail(post) {
 function hidePostModal() {
     document.getElementById('postModal').classList.add('hidden');
     state.selectedPostId = null;
+}
+
+function showAppointModeratorModal() {
+    document.getElementById('appointModeratorModal').classList.remove('hidden');
+}
+
+function hideAppointModeratorModal() {
+    document.getElementById('appointModeratorModal').classList.add('hidden');
 }
 
 // Comments
@@ -552,6 +583,61 @@ async function deleteComment(commentId) {
     } catch (error) {
         console.error('Delete comment error:', error);
         alert('Failed to delete comment');
+    }
+}
+
+async function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    try {
+        const response = await fetch(`/api/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${state.currentToken}`
+            }
+        });
+
+        if (response.ok) {
+            hidePostModal();
+            loadPosts(); // Reload posts to reflect deletion
+        } else {
+            const error = await response.json();
+            alert('Failed to delete post: ' + error.error);
+        }
+    } catch (error) {
+        console.error('Delete post error:', error);
+        alert('Failed to delete post');
+    }
+}
+
+async function appointModerator() {
+    const userId = document.getElementById('appointUserId').value.trim();
+    if (!userId) {
+        alert('Please enter a user ID');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/auth/appoint-moderator', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${state.currentToken}`
+            },
+            body: JSON.stringify({ user_id: parseInt(userId) })
+        });
+
+        if (response.ok) {
+            alert('User appointed as moderator successfully!');
+            hideAppointModeratorModal();
+            document.getElementById('appointUserId').value = '';
+        } else {
+            const error = await response.json();
+            alert('Failed to appoint moderator: ' + error.error);
+        }
+    } catch (error) {
+        console.error('Appoint moderator error:', error);
+        alert('Failed to appoint moderator');
     }
 }
 

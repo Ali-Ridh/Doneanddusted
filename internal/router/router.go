@@ -41,6 +41,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.POST("/appoint-moderator", middleware.AuthMiddleware(), authHandler.AppointModerator)
 		}
 
 		// Dashboard routes (protected)

@@ -34,6 +34,11 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// AppointModeratorRequest represents the appoint moderator request body
+type AppointModeratorRequest struct {
+	UserID uint `json:"user_id" binding:"required"`
+}
+
 // Register handles user registration
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
@@ -60,6 +65,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Username: req.Username,
 		Email:    req.Email,
 		Password: string(hashedPassword),
+		Role:     "user",
 	}
 
 	if err := h.db.Create(&user).Error; err != nil {
@@ -67,7 +73,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateJWT(user.ID, user.Username)
+	token, err := middleware.GenerateJWT(user.ID, user.Username, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -79,6 +85,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"id":       user.ID,
 			"username": user.Username,
 			"email":    user.Email,
+			"role":     user.Role,
 		},
 	})
 }
@@ -102,7 +109,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateJWT(user.ID, user.Username)
+	token, err := middleware.GenerateJWT(user.ID, user.Username, user.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
@@ -114,6 +121,37 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			"id":       user.ID,
 			"username": user.Username,
 			"email":    user.Email,
+			"role":     user.Role,
 		},
 	})
+}
+
+// AppointModerator appoints a user as moderator (only by owner)
+func (h *AuthHandler) AppointModerator(c *gin.Context) {
+	role := c.GetString("role")
+
+	if role != "owner" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "only owner can appoint moderators"})
+		return
+	}
+
+	var req AppointModeratorRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := h.db.First(&user, req.UserID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	user.Role = "moderator"
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user role"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user appointed as moderator"})
 }

@@ -14,6 +14,7 @@ import (
 type AuthClaims struct {
 	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -52,6 +53,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if claims, ok := token.Claims.(*AuthClaims); ok {
 			c.Set("user_id", claims.UserID)
 			c.Set("username", claims.Username)
+			c.Set("role", claims.Role)
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			c.Abort()
@@ -63,10 +65,11 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 // GenerateJWT creates a new JWT token for a user
-func GenerateJWT(userID uint, username string) (string, error) {
+func GenerateJWT(userID uint, username string, role string) (string, error) {
 	claims := AuthClaims{
 		UserID:   userID,
 		Username: username,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
