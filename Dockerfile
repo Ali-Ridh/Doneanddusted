@@ -17,6 +17,7 @@ WORKDIR /root/
 
 COPY --from=builder /app/forum-app .
 COPY --from=builder /app/static ./static
+COPY --from=builder /app/public ./public
 
 EXPOSE 8082
 

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Gaming Controller SVG Favicon -->
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d2d2d"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ff88"/>
+      <stop offset="100%" style="stop-color:#00cc66"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Controller Body -->
+  <path d="M8 24 Q8 16 16 16 L48 16 Q56 16 56 24 L56 40 Q56 52 44 52 L36 52 Q32 52 32 48 Q32 52 28 52 L20 52 Q8 52 8 40 Z" fill="url(#bodyGrad)" stroke="#00ff88" stroke-width="2"/>
+  
+  <!-- Left Handle -->
+  <ellipse cx="16" cy="44" rx="6" ry="8" fill="url(#bodyGrad)" stroke="#00ff88" stroke-width="1.5"/>
+  
+  <!-- Right Handle -->
+  <ellipse cx="48" cy="44" rx="6" ry="8" fill="url(#bodyGrad)" stroke="#00ff88" stroke-width="1.5"/>
+  
+  <!-- D-Pad -->
+  <rect x="14" y="26" width="4" height="12" rx="1" fill="url(#accentGrad)"/>
+  <rect x="10" y="30" width="12" height="4" rx="1" fill="url(#accentGrad)"/>
+  
+  <!-- Action Buttons -->
+  <circle cx="46" cy="28" r="3" fill="#ff6b6b"/>
+  <circle cx="52" cy="32" r="3" fill="#00ff88"/>
+  <circle cx="46" cy="36" r="3" fill="#4dabf7"/>
+  <circle cx="40" cy="32" r="3" fill="#ffd43b"/>
+  
+  <!-- Center Buttons -->
+  <rect x="28" y="30" width="8" height="4" rx="2" fill="#444"/>
+  
+  <!-- Analog Sticks -->
+  <circle cx="24" cy="40" r="4" fill="#333" stroke="#00ff88" stroke-width="1"/>
+  <circle cx="40" cy="40" r="4" fill="#333" stroke="#00ff88" stroke-width="1"/>
+</svg>

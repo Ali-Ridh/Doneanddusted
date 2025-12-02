@@ -7,55 +7,108 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
+	"forumapp/internal/config"
+	"forumapp/internal/database"
+	"forumapp/internal/middleware"
+	"forumapp/internal/router"
+
 	"github.com/stretchr/testify/assert"
 )
 
+func setupTestRouter() http.Handler {
+	// Load test configuration
+	cfg := &config.Config{
+		Port:         "8080",
+		DatabasePath: ":memory:",
+		JWTSecret:    "test-secret-key",
+		RAWGAPIKey:   "test-api-key",
+		UploadDir:    "./uploads",
+	}
+
+	// Initialize JWT secret
+	middleware.SetJWTSecret(cfg)
+
+	// Initialize database
+	db := database.Initialize(cfg)
+
+	// Setup router
+	return router.Setup(db, cfg)
+}
+
 func TestRegister(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	router := setupRouter()
+	r := setupTestRouter()
 
 	user := map[string]string{
 		"username": "testuser",
-		"password": "testpass",
+		"password": "testpass123",
 		"email":    "test@example.com",
 	}
 	jsonData, _ := json.Marshal(user)
 
-	req, _ := http.NewRequest("POST", "/register", bytes.NewBuffer(jsonData))
+	req, _ := http.NewRequest("POST", "/api/auth/register", bytes.NewBuffer(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	r.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "Registration successful")
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Contains(t, w.Body.String(), "token")
 }
 
-func setupRouter() *gin.Engine {
-	router := gin.Default()
-	router.Use(cors.Default())
-	router.Static("/static", "./static")
+func TestLogin(t *testing.T) {
+	r := setupTestRouter()
 
-	// Add routes similar to main
-	router.POST("/register", func(c *gin.Context) {
-		var user User
-		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	// First register a user
+	user := map[string]string{
+		"username": "loginuser",
+		"password": "testpass123",
+		"email":    "login@example.com",
+	}
+	jsonData, _ := json.Marshal(user)
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
-			return
-		}
+	req, _ := http.NewRequest("POST", "/api/auth/register", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
 
-		user.Password = string(hashedPassword)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-		// Mock save
-		c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
-	})
+	// Now test login
+	loginData := map[string]string{
+		"username": "loginuser",
+		"password": "testpass123",
+	}
+	jsonData, _ = json.Marshal(loginData)
 
-	return router
+	req, _ = http.NewRequest("POST", "/api/auth/login", bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "token")
+}
+
+func TestGetPosts(t *testing.T) {
+	r := setupTestRouter()
+
+	req, _ := http.NewRequest("GET", "/api/posts", nil)
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "posts")
+	assert.Contains(t, w.Body.String(), "pagination")
+}
+
+func TestGetGames(t *testing.T) {
+	r := setupTestRouter()
+
+	req, _ := http.NewRequest("GET", "/api/games", nil)
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
 }
