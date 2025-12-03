@@ -37,14 +37,25 @@ function initializeApp() {
     loadPosts();
     loadTags();
     loadLocalGames(); // Load games on init
+
+    // Initialize SPA routing
+    handleRoute(window.location.pathname);
 }
 
 // Setup Event Listeners
 function setupEventListeners() {
-    // Navigation tabs
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    // SPA Navigation
+    document.querySelector('.nav-tabs').addEventListener('click', (e) => {
+        if (e.target.matches('a.nav-tab')) {
+            e.preventDefault();
+            const href = e.target.getAttribute('href');
+            history.pushState(null, '', href);
+            handleRoute(href);
+        }
     });
+
+    // Back/Forward navigation
+    window.addEventListener('popstate', () => handleRoute(window.location.pathname));
 
     // Auth buttons
     document.getElementById('loginBtn').addEventListener('click', () => showAuthModal('login'));
@@ -104,8 +115,33 @@ function setupEventListeners() {
     });
 }
 
+// SPA Route Handler
+function handleRoute(path) {
+    if (path === '/' || path === '') path = '/feed';
+    let tab = 'feed';
+    if (path === '/games') tab = 'games';
+    else if (path === '/create-post') tab = 'createPost';
+    else if (path.startsWith('/post/')) {
+        const postId = path.split('/')[2];
+        if (postId && !isNaN(postId)) {
+            showPostDetail(parseInt(postId));
+            return; // Don't switch tab for post detail
+        } else {
+            tab = 'feed';
+        }
+    }
+    switchTab(tab);
+}
+
 // Tab Navigation
 function switchTab(tabName) {
+    const pathMap = {
+        feed: '/feed',
+        games: '/games',
+        createPost: '/create-post'
+    };
+    const path = pathMap[tabName] || '/feed';
+    history.pushState(null, '', path);
     console.log('Switching to tab:', tabName);
     
     // Update nav tab buttons
@@ -330,7 +366,7 @@ function displayPosts(posts) {
     }
 
     feed.innerHTML = posts.map(post => `
-        <div class="post-card" onclick="showPostDetail(${post.id})">
+        <div class="post-card" onclick="navigateToPost(${post.id})">
             <div class="post-header">
                 <h3 class="post-title">${escapeHtml(post.title)}</h3>
                 <span class="post-author">by ${post.user ? escapeHtml(post.user.username) : 'Anonymous'}</span>
@@ -1086,6 +1122,11 @@ async function createPost(e) {
         console.error('Create post error:', error);
         alert('Failed to create post');
     }
+}
+
+function navigateToPost(postId) {
+    history.pushState(null, '', `/post/${postId}`);
+    handleRoute(`/post/${postId}`);
 }
 
 // Pagination

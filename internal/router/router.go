@@ -90,5 +90,10 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		}
 	}
 
+	// Catch-all route for SPA - serve index.html for any unmatched routes
+	router.NoRoute(func(c *gin.Context) {
+		c.File("./public/index.html")
+	})
+
 	return router
 }
