@@ -72,7 +72,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 			comments.GET("/recent", commentHandler.GetRecentComments)
 		}
 
-		// Games routes - RAWG API (search-first)
+		// Games routes - RAWG API
 		games := api.Group("/games")
 		{
 			// RAWG API routes (search-first, no initial load)
@@ -90,7 +90,7 @@ func Setup(db *gorm.DB, cfg *config.Config) *gin.Engine {
 		}
 	}
 
-	// Catch-all route for SPA - serve index.html for any unmatched routes
+
 	router.NoRoute(func(c *gin.Context) {
 		c.File("./public/index.html")
 	})
